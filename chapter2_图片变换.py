@@ -11,7 +11,7 @@ def img_converts():
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # 高斯模糊，模糊半径（奇数， 奇数）
     img_blur = cv2.GaussianBlur(img_gray, ksize=(7, 7), sigmaX=0)
-    # 边缘检测，阈值小值用于边缘连接，阈值大值用于阈值发现
+    # 边缘检测，阈值小值用于边缘连接，阈值大值用于边缘发现
     # img_canny_100_100 = cv2.Canny(img_gray, threshold1=100, threshold2=100)
     img_canny_150_200 = cv2.Canny(img_gray, threshold1=150, threshold2=200)
     # 膨胀，kernel为膨胀核，iterations为膨胀次数

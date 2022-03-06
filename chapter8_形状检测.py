@@ -11,31 +11,47 @@ def get_contours(img, img_contour):
     :param img_contour: 原图副本，绘制轮廓
     :return:
     """
+    # 寻找轮廓
     contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     for cnt in contours:
+        # 计算轮廓区域面积
         area = cv2.contourArea(cnt)
         print(area)
-        if area>500:
+        if area > 500:
+            # 面积大于500
+            # 绘制轮廓
             cv2.drawContours(img_contour, cnt, -1, (255, 0, 0), 3)
-            peri = cv2.arcLength(cnt, True)
-            #print(peri)
-            approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
+            # 计算曲线周长(轮廓曲线，是否封闭)
+            perimeter = cv2.arcLength(curve=cnt, closed=True)
+            print(perimeter)
+            # 近似多边曲线（轮廓曲线，逼近精度[值越小，两线最大距离越小，折线越多，多边形边数越多]，是否封闭）
+            approx = cv2.approxPolyDP(curve=cnt, epsilon=0.02*perimeter, closed=True)
+            # 折线折数，即多边形边数，即多边形角数
             print(len(approx))
-            objCor = len(approx)
+            obj_cor = len(approx)
+            # 计算灰度图像边距
             x, y, w, h = cv2.boundingRect(approx)
 
-            if objCor ==3: objectType ="Tri"
-            elif objCor == 4:
-                aspRatio = w/float(h)
-                if aspRatio >0.98 and aspRatio <1.03: objectType= "Square"
-                else:objectType="Rectangle"
-            elif objCor>4: objectType= "Circles"
-            else:objectType="None"
+            # 根据角数判断形状
+            if obj_cor == 3:
+                object_type = "Tri"
+            elif obj_cor == 4:
+                asp_ratio = w/float(h)
+                if 1.03 > asp_ratio > 0.98:
+                    object_type = "Square"
+                else:
+                    object_type = "Rectangle"
+            elif obj_cor > 4:
+                object_type = "Circles"
+            else:
+                object_type = "None"
 
-            cv2.rectangle(img_contour,(x,y),(x+w,y+h),(0,255,0),2)
-            cv2.putText(img_contour,objectType,
-                        (x+(w//2)-10,y+(h//2)-10),cv2.FONT_HERSHEY_COMPLEX,0.7,
-                        (0,0,0),2)
+            # 绘制矩形边框
+            cv2.rectangle(img_contour, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            # 边框左下角绘制文字
+            cv2.putText(img_contour, object_type,
+                        (x, y + h), cv2.FONT_HERSHEY_COMPLEX, 0.7,
+                        (0, 0, 0), 2)
 
 
 def start():
@@ -55,7 +71,7 @@ def start():
 
     img_stack = img_stack_util.stack_img(
         ([img, img_gray, img_blur],
-         [img_canny, img_contour]), scale=0.5)
+         [img_canny, img_contour]), scale=0.7)
 
     cv2.imshow("Stack", img_stack)
 

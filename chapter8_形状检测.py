@@ -27,8 +27,8 @@ def get_contours(img, img_contour):
             # 近似多边曲线（轮廓曲线，逼近精度[值越小，两线最大距离越小，折线越多，多边形边数越多]，是否封闭）
             approx = cv2.approxPolyDP(curve=cnt, epsilon=0.02*perimeter, closed=True)
             # 折线折数，即多边形边数，即多边形角数
-            print(len(approx))
             obj_cor = len(approx)
+            print(obj_cor)
             # 计算灰度图像边距
             x, y, w, h = cv2.boundingRect(approx)
 

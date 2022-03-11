@@ -24,9 +24,9 @@ def get_contours(img, img_contour):
             # 计算曲线周长(轮廓曲线，是否封闭)
             perimeter = cv2.arcLength(curve=cnt, closed=True)
             print(perimeter)
-            # 近似多边曲线（轮廓曲线，逼近精度[值越小，两线最大距离越小，折线越多，多边形边数越多]，是否封闭）
+            # 近似多边曲线（轮廓曲线，逼近精度[值越小，两线最大距离越小，折线越多，多边形边数越多]，是否封闭），返回定点向量
             approx = cv2.approxPolyDP(curve=cnt, epsilon=0.02*perimeter, closed=True)
-            # 折线折数，即多边形边数，即多边形角数
+            # 多边形角数
             obj_cor = len(approx)
             print(obj_cor)
             # 计算灰度图像边距

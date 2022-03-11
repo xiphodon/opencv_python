@@ -190,8 +190,26 @@ class VirtualBrush:
         绘制画笔路径
         :return:
         """
+        # 绘制圆点
+        # for point in self.color_points_list:
+        #     cv2.circle(img, (point[0], point[1]), 5, self.my_colors_list[point[2]]['color_BGR'], cv2.FILLED)
+
+        # 绘制各个颜色轨迹（直线）
+        # 拆分颜色轨迹
+        split_color_points_dict = dict()
         for point in self.color_points_list:
-            cv2.circle(img, (point[0], point[1]), 5, self.my_colors_list[point[2]]['color_BGR'], cv2.FILLED)
+            split_color_points_dict.setdefault(point[2], list()).append(point)
+
+        for item_color_points in split_color_points_dict.values():
+            for i, point in enumerate(item_color_points):
+                if i > 0:
+                    cv2.line(
+                        img=img,
+                        pt1=item_color_points[i - 1][:2],
+                        pt2=item_color_points[i][:2],
+                        color=self.my_colors_list[item_color_points[i][2]]['color_BGR'],
+                        thickness=3
+                    )
 
     def brush_draw(self):
         """

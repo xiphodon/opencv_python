@@ -140,7 +140,6 @@ class VirtualBrush:
                 cv2.destroyAllWindows()
                 break
 
-
     def find_color_points(self, img, img_result):
         """
         寻找颜色位置点
@@ -177,12 +176,12 @@ class VirtualBrush:
                 else:
                     continue
                 # 周长
-                peri = cv2.arcLength(cnt, True)
+                peri = cv2.arcLength(curve=cnt, closed=True)
                 # 近似多边形
-                approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
+                approx = cv2.approxPolyDP(curve=cnt, epsilon=0.02*peri, closed=True)
                 x, y, w, h = cv2.boundingRect(approx)
-                cv2.drawContours(img_result, cnt, -1, (255, 0, 0), thickness=2)
-                cv2.rectangle(img_result, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
+                cv2.drawContours(image=img_result, contours=cnt, contourIdx=-1, color=(255, 0, 0), thickness=2)
+                cv2.rectangle(img=img_result, pt1=(x, y), pt2=(x+w, y+h), color=(0, 255, 0), thickness=2)
         return x + w//2, y
 
     def draw_brush_stroke(self, img):

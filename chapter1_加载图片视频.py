@@ -17,7 +17,7 @@ def read_video():
     :return:
     """
     # 视频路径为获取资源，id序号则为摄像头id，0为默认第一个摄像头id
-    # cap = cv2.VideoCapture(r'./resources/video_test.mp4')
+    # cap = cv2.VideoCapture(r'./resources/video.mp4')
     cap = cv2.VideoCapture(0)
     # cap propId 0-18
     cap.set(3, 800)    # 3为宽

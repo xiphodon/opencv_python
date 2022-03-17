@@ -216,12 +216,16 @@ class VirtualBrush:
         :return:
         """
         while True:
+            timer_1 = cv2.getTickCount()
             success, img = self.cap.read()
             # 水平反转180度（沿y轴）
             img = cv2.flip(img, 180)
             img_result = img.copy()
             self.find_color_points(img, img_result)
             self.draw_brush_stroke(img_result)
+
+            fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer_1)
+            cv2.putText(img_result, f'{fps: 0.2f}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
             cv2.imshow('img', img_result)
 

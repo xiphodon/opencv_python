@@ -15,6 +15,8 @@ class PanoramaStitching:
         if status == cv2.STITCHER_OK:
             cv2.imshow('pano', pano)
             cv2.waitKey(0)
+        else:
+            print('无法拼接为全景图')
 
 
 if __name__ == '__main__':

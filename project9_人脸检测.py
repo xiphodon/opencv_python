@@ -97,20 +97,18 @@ class FaceRecognition:
             img = cv2.resize(src=img, dsize=(500, 300))
             if success:
                 location_list = face_recognition.face_locations(img)
-                if len(location_list) <= 0:
-                    continue
+                if len(location_list) > 0:
+                    face_landmarks = face_recognition.face_landmarks(img, location_list, model='large')
+                    for face_landmark in face_landmarks:
+                        img = self.draw_face_landmark(img, face_landmark)
 
-                face_landmarks = face_recognition.face_landmarks(img, location_list, model='large')
-                for face_landmark in face_landmarks:
-                    img = self.draw_face_landmark(img, face_landmark)
-
-                # box顺序为(top, right, bottom, left)
-                location = location_list[0]
-                cv2.rectangle(img=img,
-                              pt1=(location[3], location[0]),
-                              pt2=(location[1], location[2]),
-                              color=(255, 0, 255),
-                              thickness=2)
+                    # box顺序为(top, right, bottom, left)
+                    location = location_list[0]
+                    cv2.rectangle(img=img,
+                                  pt1=(location[3], location[0]),
+                                  pt2=(location[1], location[2]),
+                                  color=(255, 0, 255),
+                                  thickness=2)
                 fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer_1)
                 cv2.putText(img, f'{fps: 0.2f}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                 cv2.imshow('face', img)

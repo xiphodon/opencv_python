@@ -1,17 +1,20 @@
+import typing
+
 import cv2
 import numpy as np
 
 
-def stack_img(img_arr: tuple, scale=1.0):
+def stack_img(img_arr: tuple, scale=1.0, lables=None):
     """
     堆叠图片
     :param img_arr:
     :param scale:
+    :param lables:
     :return:
     """
     if not isinstance(img_arr[0], list):
         # 仅水平堆叠
-        img_arr = (list(img_arr), )
+        img_arr = (list(img_arr),)
 
     rows = len(img_arr)
 
@@ -26,11 +29,20 @@ def stack_img(img_arr: tuple, scale=1.0):
     col_all_img_list = list()
     for i in range(rows):
         row_all_img_list = list()
-        for item_img in img_arr[i]:
+        for j, item_img in enumerate(img_arr[i]):
             if len(item_img.shape) == 2:
-                # 灰度图
+                # 灰度图转为3通道图
                 item_img = cv2.cvtColor(item_img, cv2.COLOR_GRAY2BGR)
-            row_all_img_list.append(cv2.resize(item_img, dsize=(first_img_shape[1], first_img_shape[0])))
+            _img = cv2.resize(item_img, dsize=(first_img_shape[1], first_img_shape[0]))
+            if lables is not None:
+                offset = 1
+                cv2.rectangle(img=_img, pt1=(offset, offset),
+                              pt2=(first_img_shape[0] - offset, int(30 * scale) - offset), color=(255, 255, 255),
+                              thickness=cv2.FILLED)
+                cv2.putText(img=_img, text=lables[i][j], org=(offset, int(20 * scale)),
+                            fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7 * scale, color=(0, 255, 0),
+                            thickness=max(round(2 * scale), 1))
+            row_all_img_list.append(_img)
         if len(img_arr[i]) < row_max_num:
             for _ in range(row_max_num - len(img_arr[i])):
                 row_all_img_list.append(black_img)

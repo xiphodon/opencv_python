@@ -21,7 +21,7 @@ class DocumentScanner:
         self.threshold_1 = 'threshold1'
         self.threshold_2 = 'threshold2'
 
-    def trackbar_onchange(self):
+    def trackbar_onchange(self, v):
         pass
 
     def initialize_trackbars(self):

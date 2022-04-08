@@ -6,10 +6,10 @@ import cv2
 
 class YOLO:
     def __init__(self, model_tiny=True):
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
         self.w_h = 320
-        self.cfg_threshold = 0.4
-        self.nms_threshold = 0.2
+        self.cfg_threshold = 0.45
+        self.nms_threshold = 0.3
 
         self.classes_filepath = r'./resources/yolo_v3/coco.names'
         self.classes_names = list()
@@ -97,5 +97,5 @@ class YOLO:
 
 
 if __name__ == '__main__':
-    yolo_v3 = YOLO(model_tiny=True)
+    yolo_v3 = YOLO(model_tiny=False)
     yolo_v3.run()

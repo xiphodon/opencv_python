@@ -6,6 +6,7 @@ from utils.img_stack_util import stack_img
 class OpticalMarkRecognition:
     """
     光学标记识别（OMR）
+    答题卡识别
     """
 
     def __init__(self):
@@ -53,8 +54,9 @@ class OpticalMarkRecognition:
         :param color: 颜色
         :return:
         """
-        cv2.drawContours(image=draw_img, contours=points, contourIdx=-1, color=color,
+        cv2.drawContours(image=draw_img, contours=[points], contourIdx=-1, color=color,
                          thickness=10)
+        points = self.points_reorder(points)
         pts1 = np.float32(points)
         pts2 = np.float32([[0, 0], [warp_shape_w_h[0], 0], [0, warp_shape_w_h[1]],
                            [warp_shape_w_h[0], warp_shape_w_h[1]]])
@@ -126,7 +128,7 @@ class OpticalMarkRecognition:
                     arc_length = cv2.arcLength(curve=contour, closed=True)
                     approx = cv2.approxPolyDP(curve=contour, epsilon=0.02 * arc_length, closed=True)
                     if len(approx) == 4:
-                        contours_data.append([area, self.points_reorder(approx)])
+                        contours_data.append([area, approx])
             contours_data = sorted(contours_data, key=lambda x: x[0], reverse=True)
             # print(contours_data)
 
@@ -200,7 +202,7 @@ class OpticalMarkRecognition:
 
             img_final = stack_img(img_arr=([img, img_canny, img_copy_contour, mark_warp_img_gray, mark_warp_img_binary],
                                            [mark_warp_img_copy, mark_warp_mask, mark_mask_img, grade_mask_img,
-                                            img_result]), scale=0.45,
+                                            img_result]), scale=0.4,
                                   lables=[['img', 'img_canny', 'img_copy_contour', 'mark_warp_img_gray',
                                            'mark_warp_img_binary'],
                                           ['mark_warp_img_copy', 'mark_warp_mask', 'mark_mask_img', 'grade_mask_img',

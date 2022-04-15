@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils.np_utils import to_categorical
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense
 from keras.layers import Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
@@ -38,6 +38,8 @@ class DigitsRecognitionNeuralNetwork:
             shear_range=0.1,
             rotation_range=20
         )
+
+        self.model_trained_path = Path(r'./resources/digits_nn_model_trained.h5')
 
     def load_img(self):
         """
@@ -187,13 +189,51 @@ class DigitsRecognitionNeuralNetwork:
         plt.show()
 
         score = model.evaluate(x_test, y_test, verbose=0)
-        print('Test Score = ', score[0])
+        print('Test Loss = ', score[0])
         print('Test Accuracy =', score[1])
 
-        with open(r'./resources/digits_nn_model_trained.p', 'wb') as fp:
-            pickle.dump(model, fp)
+        # with open(self.model_trained_path.as_posix(), 'wb') as fp:
+        #     pickle.dump(model, fp)
+        model.save(self.model_trained_path)
+
+    def camera_run_model(self):
+        """
+        使用摄像头运行模型
+        :return:
+        """
+        cap = cv2.VideoCapture(1)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        threshold = 0.9
+
+        # with open(self.model_trained_path.as_posix(), 'rb') as fp:
+        #     model = pickle.load(fp)
+        model = load_model(self.model_trained_path)
+
+        while True:
+            success, img_origin = cap.read()
+            img = np.array(img_origin)
+            img = cv2.resize(src=img, dsize=self.img_shape[:2])
+            img = self.pre_processing(img)
+            # cv2.imshow('processed image', img)
+            img = img.reshape((1, *self.img_shape[:2], 1))
+
+            predictions = model.predict(img)
+            # print(predictions)
+            class_id = np.argmax(a=predictions, axis=1)
+            prediction = predictions[0][class_id]
+            print(class_id, prediction)
+
+            if prediction > threshold:
+                cv2.putText(img=img_origin, text=f'{class_id}  {prediction}', org=(50, 50), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                            fontScale=1, color=(0, 0, 255), thickness=2)
+            cv2.imshow('img_origin', img_origin)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
 
 if __name__ == '__main__':
     drnn = DigitsRecognitionNeuralNetwork()
-    drnn.run()
+    # drnn.run()
+    drnn.camera_run_model()

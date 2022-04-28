@@ -2,7 +2,7 @@ import pathlib
 
 import numpy as np
 import matplotlib.pyplot as plt
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense
 from keras.optimizer_v2.adam import Adam
 from keras.utils.np_utils import to_categorical
@@ -27,8 +27,8 @@ class TrafficSignClassification:
         self.labels_path = self.data_path / 'labels' / 'labels.csv'
         self.img_dir_path = self.data_path / 'images'
 
-        self.batch_size_value = 50
-        self.step_per_epoch_value = 2000
+        self.batch_size_value = 64
+        self.step_per_epoch_value = 200
         self.epochs_value = 10
         self.img_shape = (32, 32, 3)
         self.test_data_ratio = 0.2
@@ -45,6 +45,8 @@ class TrafficSignClassification:
         self.y_train = None
         self.y_validation = None
         self.y_test = None
+
+        self.model_trained_path = pathlib.Path('./resources/traffic_sign_nn_model_trained.h5')
 
     def load_data(self):
         """
@@ -146,10 +148,141 @@ class TrafficSignClassification:
         运行方法
         :return:
         """
-        pass
+        # 数据预处理
+        x_train = np.array(list(map(self.preprocessing, self.x_train)))
+        x_validation = np.array(list(map(self.preprocessing, self.x_validation)))
+        x_test = np.array(list(map(self.preprocessing, self.x_test)))
+        cv2.imshow('preprocessing img', x_train[random.randint(0, len(x_train) - 1)])
+
+        # 增加灰度图的通道数，设置为1
+        x_train = x_train.reshape(*x_train.shape, 1)
+        x_validation = x_validation.reshape(*x_validation.shape, 1)
+        x_test = x_test.reshape(*x_test.shape, 1)
+
+        # 构造数据生成器
+        data_gen = ImageDataGenerator(width_shift_range=0.1,
+                                      height_shift_range=0.1,
+                                      zoom_range=0.2,
+                                      shear_range=0.1,
+                                      rotation_range=10)
+        data_gen.fit(x_train)
+
+        # 绘制数据增强的样本
+        batches = data_gen.flow(x_train, self.y_train, batch_size=self.batch_size_value)
+        x_batch, y_batch = next(batches)
+        fig, axs = plt.subplots(nrows=1, ncols=15, figsize=(20, 5))
+        fig.tight_layout()
+        for i in range(15):
+            axs[i].imshow(x_batch[i].reshape(*self.img_shape[:2]), cmap='gray')
+            axs[i].axis('off')
+        plt.show()
+
+        # one-hot
+        y_train = to_categorical(self.y_train, self.classes_size)
+        y_validation = to_categorical(self.y_validation, self.classes_size)
+        y_test = to_categorical(self.y_test, self.classes_size)
+
+        model = self.create_model()
+        print(model.summary())
+
+        result = model.fit(data_gen.flow(x_train, y_train, batch_size=self.batch_size_value),
+                           steps_per_epoch=self.step_per_epoch_value, epochs=self.epochs_value,
+                           validation_data=(x_validation, y_validation), shuffle=True)
+
+        # 绘制指标
+        plt.figure(1)
+        plt.plot(result.history['loss'])
+        plt.plot(result.history['val_loss'])
+        plt.legend(['training', 'validation'])
+        plt.title('loss')
+        plt.xlabel('epoch')
+        plt.figure(2)
+        plt.plot(result.history['accuracy'])
+        plt.plot(result.history['val_accuracy'])
+        plt.legend(['training', 'validation'])
+        plt.title('Acurracy')
+        plt.xlabel('epoch')
+        plt.show()
+        score = model.evaluate(x_test, y_test, verbose=0)
+        print('Test Score:', score[0])
+        print('Test Accuracy:', score[1])
+
+        model.save(self.model_trained_path)
+
+        cv2.waitKey(0)
+
+    def create_model(self):
+        """
+        创建模型
+        :return:
+        """
+        filters_size = 60
+        filter_1_shape = (5, 5)
+        filter_2_shape = (3, 3)
+        pool_shape = (2, 2)
+        nodes_size = 500
+
+        model = Sequential(name='traffic_sign_model')
+        model.add(layer=Conv2D(filters=filters_size, kernel_size=filter_1_shape, input_shape=(*self.img_shape[:2], 1),
+                               activation='relu'))
+        model.add(layer=Conv2D(filters=filters_size, kernel_size=filter_1_shape, activation='relu'))
+        model.add(layer=MaxPooling2D(pool_size=pool_shape))
+
+        model.add(layer=Conv2D(filters=filters_size // 2, kernel_size=filter_2_shape, activation='relu'))
+        model.add(layer=Conv2D(filters=filters_size // 2, kernel_size=filter_2_shape, activation='relu'))
+        model.add(layer=MaxPooling2D(pool_size=pool_shape))
+        model.add(layer=Dropout(0.5))
+
+        model.add(layer=Flatten())
+        model.add(layer=Dense(units=nodes_size, activation='relu'))
+        model.add(layer=Dropout(0.5))
+        model.add(layer=Dense(units=self.classes_size, activation='softmax'))
+
+        model.compile(Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+        return model
+
+    def camera_run(self):
+        """
+        摄像头识别
+        :return:
+        """
+        model = load_model(self.model_trained_path)
+        df = pd.read_csv(self.labels_path)
+
+        cap = cv2.VideoCapture(1)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        threshold = 0.85
+
+        while True:
+            success, img_origin = cap.read()
+            img = np.array(img_origin)
+            img = cv2.resize(src=img, dsize=self.img_shape[:2])
+            img = self.preprocessing(img)
+            # cv2.imshow('processed image', img)
+            img = img.reshape((1, *self.img_shape[:2], 1))
+
+            predictions = model.predict(img)
+            # print(predictions)
+            class_id = np.argmax(a=predictions[0], axis=0)
+            prediction = predictions[0][class_id]
+            print(class_id, prediction)
+
+            if prediction > threshold:
+                print(f'class name: {df.loc[class_id, "Name"]}')
+                cv2.putText(img=img_origin, text=f'{class_id} {df.loc[class_id, "Name"]}  {prediction: .2f}', org=(50, 50),
+                            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                            fontScale=1, color=(0, 0, 255), thickness=2)
+            cv2.imshow('img_origin', img_origin)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
 
 if __name__ == '__main__':
     tsc = TrafficSignClassification()
-    tsc.load_data()
-    tsc.split_data()
-    tsc.plot_samples()
+    # tsc.load_data()
+    # tsc.split_data()
+    # tsc.plot_samples()
+    # tsc.run()
+    tsc.camera_run()

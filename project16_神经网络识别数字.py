@@ -220,7 +220,7 @@ class DigitsRecognitionNeuralNetwork:
 
             predictions = model.predict(img)
             # print(predictions)
-            class_id = np.argmax(a=predictions, axis=1)
+            class_id = np.argmax(a=predictions[0], axis=0)
             prediction = predictions[0][class_id]
             print(class_id, prediction)
 

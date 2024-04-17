@@ -1,20 +1,22 @@
-import typing
+from typing import List, Any
 
 import cv2
 import numpy as np
 
 
-def stack_img(img_arr: tuple, scale=1.0, lables=None):
+def stack_img(img_arr: tuple[List or Any, ...], scale=1.0, labels=None):
     """
     堆叠图片
     :param img_arr:
     :param scale:
-    :param lables:
+    :param labels:
     :return:
     """
     if not isinstance(img_arr[0], list):
         # 仅水平堆叠
         img_arr = (list(img_arr),)
+        if labels is not None:
+            labels = (list(labels),)
 
     rows = len(img_arr)
 
@@ -23,8 +25,8 @@ def stack_img(img_arr: tuple, scale=1.0, lables=None):
     for i in range(rows):
         row_max_num = max(row_max_num, len(img_arr[i]))
     first_img = img_arr[0][0]
-    first_img_shape = list(first_img.shape)
-    first_img_shape[0], first_img_shape[1] = int(scale * first_img_shape[0]), int(scale * first_img_shape[1])
+    first_img_shape: list[int] = list(first_img.shape)
+    first_img_shape[0], first_img_shape[1] = int(first_img_shape[0] * scale), int(first_img_shape[1] * scale)
     black_img = np.zeros(shape=(first_img_shape[0], first_img_shape[1], 3), dtype=np.uint8)
     col_all_img_list = list()
     for i in range(rows):
@@ -34,12 +36,12 @@ def stack_img(img_arr: tuple, scale=1.0, lables=None):
                 # 灰度图转为3通道图
                 item_img = cv2.cvtColor(item_img, cv2.COLOR_GRAY2BGR)
             _img = cv2.resize(item_img, dsize=(first_img_shape[1], first_img_shape[0]))
-            if lables is not None:
+            if labels is not None:
                 offset = 1
                 cv2.rectangle(img=_img, pt1=(offset, offset),
                               pt2=(first_img_shape[0] - offset, int(30 * scale) - offset), color=(255, 255, 255),
                               thickness=cv2.FILLED)
-                cv2.putText(img=_img, text=lables[i][j], org=(2 * offset, int(20 * scale)),
+                cv2.putText(img=_img, text=labels[i][j], org=(2 * offset, int(20 * scale)),
                             fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7 * scale, color=(0, 0, 0),
                             thickness=max(round(2 * scale), 1))
             row_all_img_list.append(_img)

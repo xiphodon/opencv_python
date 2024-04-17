@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 from utils import img_stack_util
 
@@ -26,6 +25,7 @@ def get_contours(img, img_contour):
             print(perimeter)
             # 近似多边曲线（轮廓曲线，逼近精度[值越小，两线最大距离越小，折线越多，多边形边数越多]，是否封闭），返回定点向量
             approx = cv2.approxPolyDP(curve=cnt, epsilon=0.02*perimeter, closed=True)
+            print(approx)
             # 多边形角数
             obj_cor = len(approx)
             print(obj_cor)
@@ -63,15 +63,19 @@ def start():
     # 副本
     img_contour = img.copy()
 
-    img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # 高斯模糊，降噪
     img_blur = cv2.GaussianBlur(img_gray, ksize=(7, 7), sigmaX=1)
     img_canny = cv2.Canny(img_blur, 40, 40)
     get_contours(img_canny, img_contour)
 
     img_stack = img_stack_util.stack_img(
-        ([img, img_gray, img_blur],
-         [img_canny, img_contour]), scale=0.7)
+        img_arr=([img, img_gray, img_blur],
+                 [img_canny, img_contour]),
+        scale=0.6,
+        labels=(['origin', 'gray', 'blur'],
+                ['canny', 'contour'])
+    )
 
     cv2.imshow("Stack", img_stack)
 

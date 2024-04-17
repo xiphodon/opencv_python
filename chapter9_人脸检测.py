@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 face_cascade = cv2.CascadeClassifier(r'./resources/haarcascade_frontalface_default.xml')
 
@@ -56,4 +55,3 @@ def detect_video_face():
 if __name__ == '__main__':
     # detect_img_face()
     detect_video_face()
-

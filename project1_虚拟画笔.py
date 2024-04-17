@@ -123,14 +123,14 @@ class VirtualBrush:
             # HSV 分别为 色调、饱和度、纯度
             img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-            for item in self.my_colors_list[:1]:
+            for item in self.my_colors_list:
                 hsv_lower = np.array(item['hsv_min'])
                 hsv_upper = np.array(item['hsv_max'])
                 print(item['color_name'], hsv_lower, hsv_upper)
                 mask = cv2.inRange(img_hsv, hsv_lower, hsv_upper)
                 img_result = cv2.bitwise_and(img, img, mask=mask)
                 big_img = img_stack_util.stack_img(([img, img_hsv], [mask, img_result]), scale=0.5)
-                cv2.imshow('img', big_img)
+                cv2.imshow(item['color_name'], big_img)
             # cv2.waitKey(1)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -218,8 +218,8 @@ class VirtualBrush:
         while True:
             timer_1 = cv2.getTickCount()
             success, img = self.cap.read()
-            # 水平反转180度（沿y轴）
-            img = cv2.flip(img, 180)
+            # 沿y轴翻转
+            img = cv2.flip(img, 1)
             img_result = img.copy()
             self.find_color_points(img, img_result)
             self.draw_brush_stroke(img_result)

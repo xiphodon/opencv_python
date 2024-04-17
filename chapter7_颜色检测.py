@@ -18,7 +18,7 @@ def create_track_bar():
     创建跟踪杆
     :return:
     """
-    cv2.namedWindow(track_windows_name)
+    cv2.namedWindow(track_windows_name, flags=cv2.WINDOW_AUTOSIZE)
     cv2.resizeWindow(track_windows_name, 600, 300)
 
     # 色度

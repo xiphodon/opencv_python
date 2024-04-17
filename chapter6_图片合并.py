@@ -26,7 +26,7 @@ def my_img_stack():
     # big_img = stack_img(img_arr=(img, img))
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_small = cv2.resize(img, dsize=(128, 128))
-    big_img = stack_img(img_arr=(img, img_gray, img_small), scale=0.5)
+    big_img = stack_img(img_arr=(img, img_gray, img_small), scale=0.5, labels=('origin', 'gray', 'small'))
     # big_img = stack_img(img_arr=([img, img_gray, img_small], ), scale=0.5)
     # big_img = stack_img(img_arr=([img, img_gray], [img, img, img], [img]), scale=0.3)
     cv2.imshow('stack img', big_img)

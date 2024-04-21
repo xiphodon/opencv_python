@@ -110,7 +110,7 @@ class AugmentedReality:
             all_img = stack_img(img_arr=([camera_img_mark, camera_img_result],
                                          [img_warp, img_result]),
                                 scale=0.7,
-                                lables=[['camera_img_mark', 'camera_img_result'],
+                                labels=[['camera_img_mark', 'camera_img_result'],
                                         ['img_warp', 'img_result']])
 
             cv2.imshow('img_features', img_features)

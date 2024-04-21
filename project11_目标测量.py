@@ -10,7 +10,7 @@ class ObjectMeasurement:
     def __init__(self, is_camera=True):
         self.is_camera = is_camera
         self.file_path = r'./resources/a4_paper.png'
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
         self.cap.set(cv2.CAP_PROP_BRIGHTNESS, 200)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1000)
@@ -59,14 +59,15 @@ class ObjectMeasurement:
         # points shape (4, 1, 2)
         _points = points.reshape((4, 2))
         points_new = np.zeros(points.shape, np.int32)
-        # 将每个点坐标求和，可得到左上角点（最小）与右下角点（最大）, h + w
+        # 将每个点坐标求和，可得到左上角点（最小）与右下角点（最大）, x + y
         points_add = _points.sum(axis=1)
         points_new[0] = _points[np.argmin(points_add)]
         points_new[3] = _points[np.argmax(points_add)]
-        # 将每个点坐标求差，可得到左下角点（最小）与右上角点（最大）, h - w
+        # 将每个点坐标求差，可得到左下角点（最大）与右上角点（最小）, y - x
         points_diff = np.diff(_points, axis=1)
         points_new[1] = _points[np.argmin(points_diff)]
         points_new[2] = _points[np.argmax(points_diff)]
+        # print(points_new)
         return points_new
 
     def warp_img(self, img, points, w, h, padding=20):
@@ -134,5 +135,5 @@ class ObjectMeasurement:
 
 
 if __name__ == '__main__':
-    om = ObjectMeasurement(is_camera=True)
+    om = ObjectMeasurement(is_camera=False)
     om.run()

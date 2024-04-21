@@ -27,7 +27,7 @@ class DocumentScanner:
     def initialize_trackbars(self):
         cv2.namedWindow(winname=self.window_name)
         cv2.resizeWindow(winname=self.window_name, width=360, height=240)
-        cv2.createTrackbar(self.threshold_1, self.window_name, 200, 255, self.trackbar_onchange)
+        cv2.createTrackbar(self.threshold_1, self.window_name, 100, 255, self.trackbar_onchange)
         cv2.createTrackbar(self.threshold_2, self.window_name, 200, 255, self.trackbar_onchange)
 
     def pre_processing(self, img):
@@ -66,11 +66,19 @@ class DocumentScanner:
             if area > 5000:
                 peri = cv2.arcLength(cnt, closed=True)
                 # 多边形折线顶点
-                approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+                approx = cv2.approxPolyDP(cnt, 0.08 * peri, True)
                 if area > max_area and len(approx) == 4:
                     max_approx = approx
                     max_area = area
-        cv2.drawContours(image=img_contour, contours=max_approx, contourIdx=-1, color=(255, 0, 0), thickness=20)
+        # print(max_approx)
+        # print(max_approx.shape)
+        if len(max_approx) > 0:
+            cv2.drawContours(image=img_contour, contours=[max_approx], contourIdx=0, color=(255, 0, 0), thickness=5)
+            for _point in max_approx:
+                point = _point[0]
+                cv2.circle(img=img_contour, center=point, radius=2, color=(0, 0, 255), thickness=5)
+                cv2.putText(img=img_contour, text=f'({point[0]}, {point[1]})', org=point,
+                            fontFace=cv2.FONT_HERSHEY_COMPLEX, fontScale=0.4, color=(0, 255, 0), thickness=1)
         return max_approx
 
     def points_reorder(self, points):
@@ -82,14 +90,15 @@ class DocumentScanner:
         # points shape (4, 1, 2)
         _points = points.reshape((4, 2))
         points_new = np.zeros(points.shape, np.int32)
-        # 将每个点坐标求和，可得到左上角点（最小）与右下角点（最大）, h + w
+        # 将每个点坐标求和，可得到左上角点（最小）与右下角点（最大）, x + y
         points_add = _points.sum(axis=1)
         points_new[0] = _points[np.argmin(points_add)]
         points_new[3] = _points[np.argmax(points_add)]
-        # 将每个点坐标求差，可得到左下角点（最小）与右上角点（最大）, h - w
+        # 将每个点坐标求差，可得到左下角点（最大）与右上角点（最小）, y - x
         points_diff = np.diff(_points, axis=1)
         points_new[1] = _points[np.argmin(points_diff)]
         points_new[2] = _points[np.argmax(points_diff)]
+        # print(points_new)
         return points_new
 
     def get_warp(self, img, max_approx):
@@ -110,6 +119,7 @@ class DocumentScanner:
             [self.width_img, self.height_img]
         ])
         matrix = cv2.getPerspectiveTransform(points_1, points_2)
+        # print(matrix.shape)
         img_warp = cv2.warpPerspective(img, matrix, (self.width_img, self.height_img))
 
         # 裁剪四周
@@ -134,19 +144,20 @@ class DocumentScanner:
             # 灰度
             img_gray = cv2.cvtColor(src=img_content, code=cv2.COLOR_BGR2GRAY)
             # 二值
-            img_binary = cv2.adaptiveThreshold(src=img_gray, maxValue=255, adaptiveMethod=cv2.BORDER_REPLICATE,
+            img_binary = cv2.adaptiveThreshold(src=img_gray, maxValue=255,
+                                               adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                                thresholdType=cv2.THRESH_BINARY, blockSize=7, C=2)
             # 中值滤波
             img_median_blur = cv2.medianBlur(src=img_binary, ksize=3)
             img_tuple = ([img, img_pre_process, img_show_contour, img_content],
                          [img_gray, img_binary, img_median_blur])
-            img_lables = (['img', 'img_pre_process', 'img_show_contour', 'img_content'],
+            img_labels = (['img', 'img_pre_process', 'img_show_contour', 'img_content'],
                           ['img_gray', 'img_binary', 'img_median_blur'])
         else:
             img_tuple = ([img, img_pre_process], [img_show_contour])
-            img_lables = (['img', 'img_pre_process'],
+            img_labels = (['img', 'img_pre_process'],
                           ['img_show_contour'])
-        stack_img = img_stack_util.stack_img(img_tuple, scale=0.8, lables=img_lables)
+        stack_img = img_stack_util.stack_img(img_tuple, scale=0.8, labels=img_labels)
         cv2.imshow('img', stack_img)
 
     def run(self, video_flag=True):

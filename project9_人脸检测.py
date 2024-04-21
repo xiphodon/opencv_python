@@ -20,7 +20,13 @@ class FaceRecognition:
         self.gates_1 = cv2.cvtColor(gates_1, cv2.COLOR_BGR2RGB)
         self.gates_2 = cv2.cvtColor(gates_2, cv2.COLOR_BGR2RGB)
 
-    def draw_face_box(self, img):
+    @staticmethod
+    def draw_face_box(img):
+        """
+        绘制脸框
+        :param img:
+        :return:
+        """
         location_list = face_recognition.face_locations(img)
         encodings = face_recognition.face_encodings(img, location_list)
         # box顺序为(top, right, bottom, left)
@@ -32,7 +38,8 @@ class FaceRecognition:
                       thickness=2)
         return img, encodings, location
 
-    def draw_face_landmark(self, img, face_landmark):
+    @staticmethod
+    def draw_face_landmark(img, face_landmark):
         """
         绘制面部
         :param img:
@@ -87,28 +94,28 @@ class FaceRecognition:
 
     def video_recognition(self):
         cap = cv2.VideoCapture(0)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 400)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
         cap.set(cv2.CAP_PROP_BRIGHTNESS, 100)
 
         while True:
             timer_1 = cv2.getTickCount()
             success, img = cap.read()
-            img = cv2.resize(src=img, dsize=(500, 300))
+            img = cv2.resize(src=img, dsize=(400, 300))
             if success:
                 location_list = face_recognition.face_locations(img)
                 if len(location_list) > 0:
                     face_landmarks = face_recognition.face_landmarks(img, location_list, model='large')
-                    for face_landmark in face_landmarks:
+                    for i, face_landmark in enumerate(face_landmarks):
                         img = self.draw_face_landmark(img, face_landmark)
 
-                    # box顺序为(top, right, bottom, left)
-                    location = location_list[0]
-                    cv2.rectangle(img=img,
-                                  pt1=(location[3], location[0]),
-                                  pt2=(location[1], location[2]),
-                                  color=(255, 0, 255),
-                                  thickness=2)
+                        # box顺序为(top, right, bottom, left)
+                        location = location_list[i]
+                        cv2.rectangle(img=img,
+                                      pt1=(location[3], location[0]),
+                                      pt2=(location[1], location[2]),
+                                      color=(255, 0, 255),
+                                      thickness=2)
                 fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer_1)
                 cv2.putText(img, f'{fps: 0.2f}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                 cv2.imshow('face', img)

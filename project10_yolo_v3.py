@@ -7,6 +7,10 @@ import cv2
 class YOLO:
     def __init__(self, model_tiny=True):
         self.cap = cv2.VideoCapture(1)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 400)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
+        self.cap.set(cv2.CAP_PROP_BRIGHTNESS, 100)
+
         self.w_h = 320
         self.cfg_threshold = 0.45
         self.nms_threshold = 0.3
@@ -75,8 +79,8 @@ class YOLO:
             timer_1 = cv2.getTickCount()
 
             success, img = self.cap.read()
-            # 水平反转180度（沿y轴）
-            img = cv2.flip(img, 180)
+            # 水平反转，沿y轴
+            img = cv2.flip(img, 1)
             blob = cv2.dnn.blobFromImage(image=img, scalefactor=1 / 255, size=(self.w_h, self.w_h), mean=[0, 0, 0],
                                          swapRB=True, crop=False)
             self.net.setInput(blob)

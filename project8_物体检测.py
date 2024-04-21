@@ -9,7 +9,7 @@ class ObjectDetection:
 
     def __init__(self):
         # 置信度
-        self.threshold = 0.5
+        self.threshold = 0.55
         # 趋向于1，则为不抑制；趋向于0，为最大化抑制
         self.nms_threshold = 0.3
         self.cap = cv2.VideoCapture(0)
@@ -80,7 +80,7 @@ class ObjectDetection:
                     cv2.rectangle(img=img, pt1=(x, y), pt2=(x + w, y + h), color=(0, 255, 0), thickness=2)
                     # cv2.rectangle(img, bbox, color=(0, 255, 0), thickness=2)
                     cv2.putText(img, f'{self.class_names[class_id - 1].upper()} {round(confidence * 100, 2)}%',
-                                (bbox[0] + 10, bbox[1] + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+                                (x + 10, y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
             cv2.imshow('img', img)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cap.release()

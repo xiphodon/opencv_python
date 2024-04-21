@@ -26,6 +26,14 @@ class AngleFinder:
     def get_angle(self):
         """
         获取角度
+
+        射线1与x轴夹角为A，斜率为tanA；
+        射线2与x轴夹角为B，斜率为tanB，
+        两射线夹角为 abs(A-B) 度。
+
+        tan(A - B) = (tanA - tanB) / (1 + tanA * tanB)  =>
+        弧度：r = A - B = arctan((tanA - tanB) / (1 + tanA * tanB))  =>
+        角度：d = 180/pi * r
         :return:
         """
         pt1, pt2, pt3 = self.point_list[-3:]

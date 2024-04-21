@@ -75,6 +75,6 @@ class TextImgOCR:
 
 if __name__ == '__main__':
     text_img_ocr = TextImgOCR()
-    # text_img_ocr.detect_characters()
+    text_img_ocr.detect_characters()
     # text_img_ocr.detect_words()
-    text_img_ocr.detect_only_digits()
+    # text_img_ocr.detect_only_digits()

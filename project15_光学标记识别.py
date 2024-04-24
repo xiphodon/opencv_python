@@ -34,11 +34,11 @@ class OpticalMarkRecognition:
         # points shape (4, 1, 2)
         _points = points.reshape((4, 2))
         points_new = np.zeros_like(_points, np.int32)
-        # 将每个点坐标求和，可得到左上角点（最小）与右下角点（最大）, h + w
+        # 将每个点坐标求和，可得到左上角点（最小）与右下角点（最大）, x + y
         points_add = _points.sum(axis=1)
         points_new[0] = _points[np.argmin(points_add)]
         points_new[3] = _points[np.argmax(points_add)]
-        # 将每个点坐标求差，可得到左下角点（最小）与右上角点（最大）, h - w
+        # 将每个点坐标求差，可得到左下角点（最大）与右上角点（最小）, y - x
         points_diff = np.diff(_points, axis=1)
         points_new[1] = _points[np.argmin(points_diff)]
         points_new[2] = _points[np.argmax(points_diff)]
@@ -203,7 +203,7 @@ class OpticalMarkRecognition:
             img_final = stack_img(img_arr=([img, img_canny, img_copy_contour, mark_warp_img_gray, mark_warp_img_binary],
                                            [mark_warp_img_copy, mark_warp_mask, mark_mask_img, grade_mask_img,
                                             img_result]), scale=0.4,
-                                  lables=[['img', 'img_canny', 'img_copy_contour', 'mark_warp_img_gray',
+                                  labels=[['img', 'img_canny', 'img_copy_contour', 'mark_warp_img_gray',
                                            'mark_warp_img_binary'],
                                           ['mark_warp_img_copy', 'mark_warp_mask', 'mark_mask_img', 'grade_mask_img',
                                            'img_result']])

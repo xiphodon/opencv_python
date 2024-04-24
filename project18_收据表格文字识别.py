@@ -115,7 +115,8 @@ class FormsOCR:
             print(len(good_match_kps))
 
             img_features = cv2.drawMatches(img1=form_img, keypoints1=kp1, img2=item_img,
-                                           keypoints2=kp2, matches1to2=good_match_kps, outImg=None, flags=2)
+                                           keypoints2=kp2, matches1to2=good_match_kps, outImg=None,
+                                           flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
 
             if len(good_match_kps) > self.good_match_pk_threshold:
                 # 匹配对数量超过阈值，表示检测到目标

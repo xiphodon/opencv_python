@@ -67,7 +67,8 @@ class AugmentedReality:
                     good_match_kps.append(m1)
             print(len(good_match_kps))
             img_features = cv2.drawMatches(img1=mark_img, keypoints1=mark_img_kps, img2=camera_img,
-                                           keypoints2=camera_img_kps, matches1to2=good_match_kps, outImg=None, flags=2)
+                                           keypoints2=camera_img_kps, matches1to2=good_match_kps, outImg=None,
+                                           flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
 
             if len(good_match_kps) > self.good_match_pk_threshold:
                 # 匹配对数量超过阈值，表示检测到目标
@@ -80,7 +81,7 @@ class AugmentedReality:
                 # 找到两张图所对应的匹配点
                 mark_img_good_kps_arr = np.float32(mark_img_good_kps).reshape(-1, 1, 2)
                 camera_img_good_kps_arr = np.float32(camera_img_good_kps).reshape(-1, 1, 2)
-                # 单应矩阵
+                # 单应矩阵，找到两个平面之间的透视变换
                 matrix, mask = cv2.findHomography(srcPoints=mark_img_good_kps_arr,
                                                   dstPoints=camera_img_good_kps_arr,
                                                   method=cv2.RANSAC,

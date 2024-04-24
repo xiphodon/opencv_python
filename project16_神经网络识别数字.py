@@ -54,7 +54,7 @@ class DigitsRecognitionNeuralNetwork:
         for i_digit_dir in digits_dir_list:
             for i_img_path in i_digit_dir.iterdir():
                 cur_img = cv2.imread(i_img_path.as_posix())
-                cur_img = cv2.resize(src=cur_img, dsize=(self.img_shape[0], self.img_shape[1]))
+                cur_img = cv2.resize(src=cur_img, dsize=(self.img_shape[1], self.img_shape[0]))
                 digit_img_list.append(cur_img)
                 digit_class_no_list.append(int(i_digit_dir.name))
             print(f'{i_digit_dir.name}', end=' ')
@@ -225,8 +225,8 @@ class DigitsRecognitionNeuralNetwork:
             print(class_id, prediction)
 
             if prediction > threshold:
-                cv2.putText(img=img_origin, text=f'{class_id}  {prediction}', org=(50, 50), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                            fontScale=1, color=(0, 0, 255), thickness=2)
+                cv2.putText(img=img_origin, text=f'{class_id}  {prediction}', org=(50, 50),
+                            fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0, 0, 255), thickness=2)
             cv2.imshow('img_origin', img_origin)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):

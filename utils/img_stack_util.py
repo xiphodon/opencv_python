@@ -39,7 +39,7 @@ def stack_img(img_arr: tuple[List or Any, ...], scale=1.0, labels=None):
             if labels is not None:
                 offset = 1
                 cv2.rectangle(img=_img, pt1=(offset, offset),
-                              pt2=(first_img_shape[0] - offset, int(30 * scale) - offset), color=(255, 255, 255),
+                              pt2=(first_img_shape[1] - offset, int(30 * scale) - offset), color=(255, 255, 255),
                               thickness=cv2.FILLED)
                 cv2.putText(img=_img, text=labels[i][j], org=(2 * offset, int(20 * scale)),
                             fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7 * scale, color=(0, 0, 0),

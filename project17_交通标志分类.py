@@ -284,5 +284,5 @@ if __name__ == '__main__':
     # tsc.load_data()
     # tsc.split_data()
     # tsc.plot_samples()
-    # tsc.run()
-    tsc.camera_run()
+    tsc.run()
+    # tsc.camera_run()

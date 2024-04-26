@@ -61,12 +61,13 @@ if __name__ == '__main__':
     hd = HandsDetector()
     cap = cv2.VideoCapture(1)
     while True:
-        success, img = cap.read()
-        hand_landmarks_dict = hd.detect_hands_landmarks(
-            img=img,
+        success, _img = cap.read()
+        _hand_landmarks_dict = hd.detect_hands_landmarks(
+            img=_img,
             show_hand_connections=True,
             show_landmarks=False,
             show_landmarks_id=True
         )
-        print(hand_landmarks_dict)
+        print(_hand_landmarks_dict)
+        cv2.imshow('img', _img)
         cv2.waitKey(1)

@@ -1,5 +1,3 @@
-from operator import attrgetter
-
 import cv2
 import mediapipe as mp
 

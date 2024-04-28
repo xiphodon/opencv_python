@@ -49,6 +49,9 @@ class GestureControl:
         pyautogui.PAUSE = 0
         self.screen_width, self.screen_height = pyautogui.size()
 
+        # 鼠标平滑系数
+        self.mouse_smoothing = 5
+
         # 上一次鼠标在屏幕上的坐标
         self.last_mouse_point = [self.screen_width/2, self.screen_height/2]
 
@@ -94,10 +97,9 @@ class GestureControl:
 
             self.thumb_first_joint_len = self.two_point_distance(self.thumb_tip, thumb_ip)
 
-    def move_mouse_point(self, delta_px: int = 20):
+    def move_mouse_point(self):
         """
         移动鼠标
-        :param delta_px:
         :return:
         """
         if not self.hands_detector_dict:
@@ -106,16 +108,15 @@ class GestureControl:
         # 屏幕上鼠标需要移动到的位置坐标
         screen_index_point = self.camera_to_screen_point(camera_point=self.index_point)
 
-        # 鼠标防抖
-        # 计算需要移动的坐标与上次鼠标的坐标距离
-        delta_distance = self.two_point_distance(
-            pt1=screen_index_point,
-            pt2=self.last_mouse_point
-        )
-        # 当变化距离大于阈值，移动鼠标并更新鼠标位置
-        if delta_distance > delta_px:
-            self.last_mouse_point = screen_index_point
-            pyautogui.moveTo(x=screen_index_point[0], y=screen_index_point[1], duration=0.02)
+        # 鼠标平滑防抖
+        last_x, last_y = self.last_mouse_point
+        current_x, current_y = screen_index_point
+        smoothing_screen_index_point_x = last_x + (current_x - last_x) / self.mouse_smoothing
+        smoothing_screen_index_point_y = last_y + (current_y - last_y) / self.mouse_smoothing
+        screen_index_point = [smoothing_screen_index_point_x, smoothing_screen_index_point_y]
+
+        pyautogui.moveTo(x=screen_index_point[0], y=screen_index_point[1], duration=0.02)
+        self.last_mouse_point = screen_index_point
 
     def camera_to_screen_point(self, camera_point: List[int]):
         """

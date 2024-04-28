@@ -24,7 +24,6 @@ class HandsTracking:
                 show_hand_connections=True,
                 show_landmarks_id=True,
                 show_landmarks=False
-
             )
 
             print(hand_landmarks_dict)

@@ -6,9 +6,8 @@ class PoseDetector:
     """
     姿态检测
     """
-    def __init__(self):
-        self.mp_pose = mp.solutions.pose
-        self.mp_pose_instance = self.mp_pose.Pose(
+    def __init__(
+            self,
             static_image_mode=False,
             model_complexity=1,
             smooth_landmarks=True,
@@ -16,6 +15,16 @@ class PoseDetector:
             smooth_segmentation=True,
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5
+    ):
+        self.mp_pose = mp.solutions.pose
+        self.mp_pose_instance = self.mp_pose.Pose(
+            static_image_mode=static_image_mode,
+            model_complexity=model_complexity,
+            smooth_landmarks=smooth_landmarks,
+            enable_segmentation=enable_segmentation,
+            smooth_segmentation=smooth_segmentation,
+            min_detection_confidence=min_detection_confidence,
+            min_tracking_confidence=min_tracking_confidence
         )
         self.mp_drawing_utils = mp.solutions.drawing_utils
 
